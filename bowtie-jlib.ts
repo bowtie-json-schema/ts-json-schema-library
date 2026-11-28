@@ -11,7 +11,7 @@ import {
     type CommandMap,
     type CommandResponse,
     type Dialect,
-    RunCmdResponse,
+    type RunResultResponse,
     sendToBowtie
 } from "./bowtie-api";
 
@@ -66,12 +66,21 @@ const cmds: CommandMap = {
         console.assert(state === "dialect" || state === "testing");
         state = "testing";
 
+        const output = args.output ?? "flag";
+        if (output !== "flag") {
+            return {
+                seq: args.seq,
+                skipped: true,
+                message: `Unsupported output format: ${output}`
+            };
+        }
+
         const node = compileSchema(args.case.schema, { remote, draft: dialect, formatAssertion: false });
         for (const id in args.case.registry) {
             node.addRemoteSchema(id, args.case.registry[id]);
         }
         // run test cases and collect results to be sent back to bowtie
-        const results: RunCmdResponse["results"] = args.case.tests.map((test) => {
+        const results: RunResultResponse["results"] = args.case.tests.map((test) => {
             try {
                 return { valid: node.validate(test.instance).valid };
             } catch (e) {
