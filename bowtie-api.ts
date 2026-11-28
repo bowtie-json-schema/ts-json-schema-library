@@ -46,6 +46,7 @@ type DialectCmdResponse = { ok: true };
 type RunCmd = {
     cmd: "run";
     seq: number;
+    output?: string | null;
     // dialect: Dialect;
     case: {
         schema: JsonSchema;
@@ -57,10 +58,18 @@ type RunCmd = {
     };
 };
 
-export type RunCmdResponse = {
+export type RunResultResponse = {
     seq: number;
     results: ({ valid: boolean } | ErrorResponse)[];
 };
+
+export type SkipResponse = {
+    seq: number;
+    skipped: true;
+    message: string;
+};
+
+export type RunCmdResponse = RunResultResponse | SkipResponse;
 
 export type ErrorResponse = {
     errored: true;
